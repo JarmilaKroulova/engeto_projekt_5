@@ -1,0 +1,41 @@
+Testovací plán pro databázi Správce úkolů
+_________________________________________
+
+Skript slouží ke správě úkolů, komunikuje s databází, která umí vytvářet, zobrazovat, aktualizovat a odstraňovat úkoly.  
+
+Cíle testování: Ověřit správnou funkčnost CRUD operací v databázi úkolů. 
+  
+Rozsah testování: Pokrytí všech CRUD funkcí - testy pozitivní, negativní
+                Netestuje se vizuální stránka programu
+
+Testovací strategie: Jednotkové automatizované testy CRUD funkcí pomocí knihovny pytest
+            Automatické vytvoření a vymazání testovacích dat
+
+Testovací prostředí: OS: Windows
+            Lokální databáze: MySQL
+
+Tento testovací plán obsahuje testovací případy (TC) pro CRUD funkce ve skriptu. 
+Funkce jsou 
+        - přidat úkol TC1 - TC2
+        - zobrazit úkol TC3 - TC4
+        - aktualizovat úkol TC5 - TC6
+        - odstranit úkol TC7 - TC8
+
+Testy automaticky vytvoří testovací prostředí, testovací data a po ukončení testů data smažou. Nepracují s produkčními daty.
+
+Testovací scénáře:
+TC1 - test_pridat_ukol_pozitivni - vloží data do databáze a zkontroluje, že byla opravdu vložena
+TC2 - test_pridat_ukol_negativni - zachycuje výjimku při zadání neúplného úkolu (nezadání popisu úkolu)
+TC3 - test_zobrazit_ukoly_pozitivni - vloží data do databáze a zkontroluje, že se data zobrazují
+TC4 - test_zobrazit_ukoly_negativní - zachycuje výjimku při prázdném seznamu úkolů
+TC5 - test_aktualizovat_ukol_pozitivni - vloží data do databáze, aktualizuje je a zkontroluje, že byla opravdu aktualizována
+TC6 - test_aktualizovat_ukol_negativní - zachycuje výjimku při prázdném seznamu úkolů (zadání čísla ID do prázdné tabulky)
+TC7 - test_odstranit_ukol_pozitivni - vloží data do databáze, odstraní je a zkontroluje, že byla opravdu odstraněna
+TC8 - test_odstranit_ukol_negativni - zachycuje výjimku při zadání špatného ID (zachycení výjimky při zadání písmena místo čísla) 
+
+Postup spuštění testů:
+v terminálu spusťte:
+
+pytest test_main.py
+
+Výsledky testů se zobrazí v terminálu po spuštění.

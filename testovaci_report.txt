@@ -1,0 +1,28 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-8.4.1, pluggy-1.6.0
+rootdir: C:\Users\Jarmi\OneDrive\Plocha\engeto_projekty\vylepseny_task_manager
+collected 8 items
+
+test_main.py ........                                                    [100%]
+
+============================== 8 passed in 0.47s ==============================
+
+Testovací report – Správce úkolů
+Datum: 20.8.2025
+Tester: Jarmila Kroulová
+
+Bylo spuštěno 8 automatizovaných testů pomocí Pytest.
+Všechny testy proběhly úspěšně (100 % PASS).
+
+Seznam testovaných případů:
+TC1 - test_pridat_ukol_pozitivni -✅PASS 
+TC2 - test_pridat_ukol_negativni - ✅PASS
+TC3 - test_zobrazit_ukoly_pozitivni - ✅PASS
+TC4 - test_zobrazit_ukoly_negativní - ✅PASS
+TC5 - test_aktualizovat_ukol_pozitivni - ✅PASS
+TC6 - test_aktualizovat_ukol_negativní - ✅PASS
+TC7 - test_odstranit_ukol_pozitivni - ✅PASS
+TC8 - test_odstranit_ukol_negativni - ✅PASS
+
+Chyby: 0
+Výsledky: OK

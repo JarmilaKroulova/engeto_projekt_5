@@ -1,0 +1,2 @@
+pytest==8.4.1
+mysql-connector-python==9.3.0
