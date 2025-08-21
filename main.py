@@ -16,7 +16,7 @@ def pripojeni_db():
         pripojeni = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="1111",  # zadejte své heslo pro připojení k MySQL Workbench
+            # password="",  # zadejte své heslo pro připojení k MySQL Workbench
 
         )
         if pripojeni.is_connected():
@@ -26,7 +26,7 @@ def pripojeni_db():
             pripojeni = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="1111",  # zadejte své heslo pro připojení k MySQL Workbench
+                # password="",  # zadejte své heslo pro připojení k MySQL Workbench
                 database="spravce_ukolu"
             )
             print("Jste úspěšně připojen k databázi Správce úkolů.")
@@ -150,7 +150,6 @@ def zobrazit_filtrovane_ukoly(pripojeni, volba_filtru):
         kurzor.close()
 
 
-
 def aktualizovat_ukol(pripojeni, volba_id, volba_stavu):
     """
     Umožňuje změnit stav úkolu z Nezahájeno = defaultní hodnota 
@@ -169,8 +168,7 @@ def aktualizovat_ukol(pripojeni, volba_id, volba_stavu):
         elif volba_stavu == "H":
             kurzor.execute("UPDATE ukoly SET stav = 'Hotovo' WHERE id = %s", (int(volba_id),))
             pripojeni.commit()
-            print(f"Úkol '{volba_id}' byl aktualizován na 'Hotovo'.")
-                
+            print(f"Úkol '{volba_id}' byl aktualizován na 'Hotovo'.")                
         else:
             print("Neplatná volba stavu.")
     except mysql.connector.Error as err:
@@ -294,7 +292,6 @@ def hlavni_menu():
             # Uzavření připojení
             pripojeni.close()
             print("Připojení k databázi bylo uzavřeno.")      
-
         
 
 if __name__ == "__main__":
