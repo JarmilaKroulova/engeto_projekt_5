@@ -47,8 +47,8 @@ def vytvoreni_tabulky(pripojeni):
             id INT AUTO_INCREMENT PRIMARY KEY,
             nazev VARCHAR(100) NOT NULL,
             popis VARCHAR(500) NOT NULL,
-            stav VARCHAR(50) ENUM('Probíhá', 'Hotovo') DEFAULT 'Nezahájeno',
-            datum_vytvoreni DATE NOT NULL
+            stav VARCHAR(50) DEFAULT 'Nezahájeno',
+            datum_vytvoreni DATE NOT NULL DEFAULT CURRENT_DATE
         );
     """)
         print("Byla vytvořena tabulka pro správu úkolů.")
@@ -81,8 +81,8 @@ def pridat_ukol(pripojeni, nazev_ukolu, popis_ukolu):
     kurzor = pripojeni.cursor()
     try:
         kurzor.execute("""
-            INSERT INTO ukoly (nazev, popis, datum_vytvoreni) 
-            VALUES (%s, %s, CURDATE());
+            INSERT INTO ukoly (nazev, popis) 
+            VALUES (%s, %s);
             """,(ukol, popis))
         pripojeni.commit()
         print(f"Úkol '{ukol}' byl zadán.")
@@ -92,24 +92,30 @@ def pridat_ukol(pripojeni, nazev_ukolu, popis_ukolu):
         kurzor.close()
 
 
+def vytisknout_ukoly(ukoly: list):
+    print("Seznam úkolů:")
+    if not ukoly:
+        print("Žádné úkoly k zobrazení.")
+        return
+    for id, nazev, popis, stav in ukoly:
+        print(f"{id}. - {nazev} - {popis} - {stav}")
+
+
 def zobrazit_ukoly(pripojeni):
     """
-    Zobrazí všechny úkoly v databázi, pokud nejsou, zobrazí hlášku o neexistenci úkolů.
+    Zobrazí všechny úkoly v databázi, pokud nejsou, zobrazí hlášku o neexistenci úkolů. 
+    Vrací list s načtenými úkoly.
     """
     kurzor = pripojeni.cursor()
-    print("Seznam úkolů:")
     try:
         kurzor.execute("""
             SELECT id, nazev, popis, stav FROM ukoly;
             """)
         vysledky = kurzor.fetchall()
-        if not vysledky:
-            raise ChybaUkolu("Žádné úkoly k zobrazení.")
-        for id, nazev, popis, stav in vysledky:
-            print(f"{id}. - {nazev} - {popis} - {stav}")
         return vysledky
     except mysql.connector.Error as err:
         print(f"Chyba při zobrazení dat: {err}")
+        return []
     finally:
         kurzor.close()
 
@@ -117,41 +123,29 @@ def zobrazit_ukoly(pripojeni):
 def zobrazit_filtrovane_ukoly(pripojeni, volba_filtru):
     """
     Zobrazí filtrované úkoly v databázi dle výběru uživatele. 
-    Možnosti výběru jsou Nezahájeno, Probíhá, Ukončeno.
+    Možnosti výběru jsou Nezahájeno, Probíhá, Hotovo.
     Pokud nejsou ve filtru žádné úkoly,zobrazí hlášku o neexistenci úkolů.
+    Vrací list s načtenými úkoly.
     """
     kurzor = pripojeni.cursor()
-    print("Seznam úkolů:")
     try:
         if volba_filtru == "N":
             kurzor.execute("""
             SELECT id, nazev, popis, stav FROM ukoly WHERE stav = 'Nezahájeno';
             """)
-            vysledky_n = kurzor.fetchall()
-            if not vysledky_n:
-                print("Žádné úkoly k zobrazení.")
-            for id, nazev, popis, stav in vysledky_n:
-                print(f"{id}. - {nazev} - {popis} - {stav}")
         elif volba_filtru == "P":
             kurzor.execute("""
             SELECT id, nazev, popis, stav FROM ukoly WHERE stav = 'Probíhá';
             """)
-            vysledky_p = kurzor.fetchall()
-            if not vysledky_p:
-                print("Žádné úkoly k zobrazení.")
-            for id, nazev, popis, stav in vysledky_p:
-                print(f"{id}. - {nazev} - {popis} - {stav}")
         elif volba_filtru == "H":
             kurzor.execute("""
             SELECT id, nazev, popis, stav FROM ukoly WHERE stav = 'Hotovo';
             """)
-            vysledky_h = kurzor.fetchall()
-            if not vysledky_h:
-                print("Žádné úkoly k zobrazení.")
-            for id, nazev, popis, stav in vysledky_h:
-                print(f"{id}. - {nazev} - {popis} - {stav}")
+        vysledky = kurzor.fetchall()
+        return vysledky
     except mysql.connector.Error as err:
         print(f"Chyba při vkládání dat: {err}")
+        return []
     finally:
         kurzor.close()
 
@@ -213,22 +207,28 @@ def zpracovat_volbu(volba: int, pripojeni):
     if volba == 1:
         nazev_ukolu = input("Zadejte název úkolu - max. 100 znaků:  ")
         popis_ukolu = input("Zadejte popis úkolu - max. 500 znaků:  ")
-        pridat_ukol(pripojeni, nazev_ukolu, popis_ukolu)
+        try:
+            pridat_ukol(pripojeni, nazev_ukolu, popis_ukolu)
+        except ChybaUkolu as chyba:
+            print(f"Chyba při vkládání úkolu: {chyba}")
     elif volba == 2:
         chce_filtrovat = input("Přejete si úkoly filtrovat? A/N:  ").upper().strip()
         while chce_filtrovat not in ("N", "A"):
             print("Neplatný výběr.")
             chce_filtrovat = input("Přejete si úkoly filtrovat? A/N:  ").upper().strip()
         if chce_filtrovat == "N":
-            zobrazit_ukoly(pripojeni)
+            vysledky = zobrazit_ukoly(pripojeni)
+            vytisknout_ukoly(vysledky)
         elif chce_filtrovat == "A":
             volba_filtru = input("Vyberte požadovaný filtr - Nezahájeno = N, Probíhá = P, Hotovo = H:  ").upper().strip()
             while volba_filtru not in ("N", "P", "H"):
                 print("Neplatný filtr. Zadejte N, P nebo H.")
                 volba_filtru = input("Vyberte požadovaný filtr - Nezahájeno = N, Probíhá = P, Hotovo = H:  ").upper().strip()
-            zobrazit_filtrovane_ukoly(pripojeni, volba_filtru)
+            vysledky = zobrazit_filtrovane_ukoly(pripojeni, volba_filtru)
+            vytisknout_ukoly(vysledky)
     elif volba == 3:
-        zobrazit_ukoly(pripojeni)
+        vysledky = zobrazit_ukoly(pripojeni)
+        vytisknout_ukoly(vysledky)
         volba_id = input("Zadejte číslo úkolu, který si přejete aktualizovat:  ").strip()
         while not volba_id.isdigit():
             print("Neplatné číslo úkolu.")
@@ -241,7 +241,8 @@ def zpracovat_volbu(volba: int, pripojeni):
        
         aktualizovat_ukol(pripojeni, volba_id, volba_stavu)
     elif volba == 4:
-        zobrazit_ukoly(pripojeni)
+        vysledky = zobrazit_ukoly(pripojeni)
+        vytisknout_ukoly(vysledky)
         volba_odstraneni = input("Zadejte číslo úkolu, který chcete odstranit (Tento krok je nevratný!):  ").strip()
         while not volba_odstraneni.isdigit():
             print("Neplatné číslo úkolu.")
@@ -298,5 +299,3 @@ def hlavni_menu():
 
 if __name__ == "__main__":
     hlavni_menu()
-
-
