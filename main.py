@@ -16,7 +16,7 @@ def pripojeni_db():
         pripojeni = mysql.connector.connect(
             host="localhost",
             user="root",
-            # password="",  # zadejte své heslo pro připojení k MySQL Workbench
+            password="1111",  # zadejte své heslo pro připojení k MySQL Workbench
 
         )
         if pripojeni.is_connected():
@@ -26,7 +26,7 @@ def pripojeni_db():
             pripojeni = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                # password="",  # zadejte své heslo pro připojení k MySQL Workbench
+                password="1111",  # zadejte své heslo pro připojení k MySQL Workbench
                 database="spravce_ukolu"
             )
             print("Jste úspěšně připojen k databázi Správce úkolů.")
@@ -48,7 +48,7 @@ def vytvoreni_tabulky(pripojeni):
             nazev VARCHAR(100) NOT NULL,
             popis VARCHAR(500) NOT NULL,
             stav VARCHAR(50) DEFAULT 'Nezahájeno',
-            datum_vytvoreni DATE NOT NULL DEFAULT CURRENT_DATE
+            datum_vytvoreni DATE NOT NULL
         );
     """)
         print("Byla vytvořena tabulka pro správu úkolů.")
@@ -81,8 +81,8 @@ def pridat_ukol(pripojeni, nazev_ukolu, popis_ukolu):
     kurzor = pripojeni.cursor()
     try:
         kurzor.execute("""
-            INSERT INTO ukoly (nazev, popis) 
-            VALUES (%s, %s);
+            INSERT INTO ukoly (nazev, popis, datum_vytvoreni) 
+            VALUES (%s, %s, curdate());
             """,(ukol, popis))
         pripojeni.commit()
         print(f"Úkol '{ukol}' byl zadán.")
